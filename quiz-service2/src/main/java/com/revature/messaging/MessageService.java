@@ -3,8 +3,6 @@ package com.revature.messaging;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -49,7 +47,6 @@ public class MessageService {
 	}
 	
 	@KafkaListener(topics = "quiz-flashcard")
-	@Transactional
 	public void processFlashcardEvent(FlashcardEvent event) {
 		this.quizDao.deleteCard(event.getFlashcard().getId());
 	}
