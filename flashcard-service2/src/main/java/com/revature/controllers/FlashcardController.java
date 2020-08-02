@@ -1,5 +1,6 @@
 package com.revature.controllers;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,8 +12,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.revature.messaging.FlashcardEvent;
+import com.revature.messaging.MessageService;
+import com.revature.messaging.Operation;
 import com.revature.models.Flashcard;
 import com.revature.repositories.FlashcardRepository;
 
@@ -21,6 +26,9 @@ public class FlashcardController {
 	
 	@Autowired
 	private FlashcardRepository flashcardDao;
+	
+	@Autowired
+	private MessageService messageService;
 	
 	@Autowired
 	private Environment env;
@@ -33,10 +41,16 @@ public class FlashcardController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<Flashcard>> findAll() {
-		List<Flashcard> all = flashcardDao.findAll();
+	public ResponseEntity<List<Flashcard>> findAll(@RequestParam(required = false) Integer[] ids) {
+		if(ids == null) {
+			List<Flashcard> all = flashcardDao.findAll();
+			
+			return ResponseEntity.ok(all);
+		}
 		
-		return ResponseEntity.ok(all);
+		List<Flashcard> some = flashcardDao.findByIdIn(Arrays.asList(ids));
+		
+		return ResponseEntity.ok(some);
 	}
 	
 	@GetMapping("/{id}")
@@ -59,6 +73,10 @@ public class FlashcardController {
 		}
 		
 		flashcardDao.save(flashcard);
+		
+		FlashcardEvent event = new FlashcardEvent(Operation.CREATE, flashcard);
+		this.messageService.triggerEvent(event);
+		
 		return ResponseEntity.status(201).body(flashcard);
 	}
 	
@@ -67,8 +85,13 @@ public class FlashcardController {
 		Optional<Flashcard> option = flashcardDao.findById(id);
 
 		if(option.isPresent()) {
-			flashcardDao.delete(option.get());
-			return ResponseEntity.accepted().body(option.get());
+			Flashcard f = option.get();
+			flashcardDao.delete(f);
+			
+			FlashcardEvent event = new FlashcardEvent(Operation.DELETE, f);
+			this.messageService.triggerEvent(event);
+			
+			return ResponseEntity.accepted().body(f);
 		}
 		
 		return ResponseEntity.notFound().build();
