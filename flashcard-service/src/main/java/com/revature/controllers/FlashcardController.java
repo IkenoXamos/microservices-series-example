@@ -50,6 +50,10 @@ public class FlashcardController {
 		
 		List<Flashcard> some = flashcardDao.findByIdIn(Arrays.asList(ids));
 		
+		if(some.size() != ids.length) {
+			return ResponseEntity.badRequest().body(some);
+		}
+		
 		return ResponseEntity.ok(some);
 	}
 	

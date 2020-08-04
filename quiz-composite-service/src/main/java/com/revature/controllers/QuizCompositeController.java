@@ -1,6 +1,10 @@
 package com.revature.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,5 +36,29 @@ public class QuizCompositeController {
 		QuizComposite composite = new QuizComposite(q, cards);
 		
 		return ResponseEntity.ok(composite);
+	}
+	
+	@GetMapping
+	public ResponseEntity<List<QuizComposite>> compileAll() {
+		List<Flashcard> allcards = this.flashcardClient.findAll();
+		
+		List<Quiz> allquiz = this.quizClient.findAll();
+		
+		if(allquiz == null) {
+			allquiz = new ArrayList<>();
+		}
+		
+		Map<Integer, Flashcard> cardMap = allcards.stream()
+				.collect(Collectors.toMap(Flashcard::getId, Function.identity()));
+		
+		List<QuizComposite> result = allquiz.stream().map((Quiz q) -> {
+			List<Flashcard> cards = q.getCards().stream()
+					.map(cardMap::get)
+					.collect(Collectors.toList());
+			
+			return new QuizComposite(q, cards);
+		}).collect(Collectors.toList());
+		
+		return ResponseEntity.ok(result);
 	}
 }

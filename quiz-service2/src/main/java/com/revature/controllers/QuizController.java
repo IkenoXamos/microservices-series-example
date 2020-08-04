@@ -68,6 +68,12 @@ public class QuizController {
 			return ResponseEntity.badRequest().build();
 		}
 		
+		List<Flashcard> cards = this.flashcardClient.findByIds(quiz.getCards());
+		
+		if(cards == null || cards.size() != quiz.getCards().size()) {
+			return ResponseEntity.badRequest().build();
+		}
+		
 		this.quizDao.save(quiz);
 		this.messageService.triggerEvent(new QuizEvent(Operation.CREATE, quiz));
 		
