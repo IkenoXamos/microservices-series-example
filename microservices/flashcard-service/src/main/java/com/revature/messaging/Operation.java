@@ -1,5 +1,5 @@
 package com.revature.messaging;
 
 public enum Operation {
-	DELETE, CREATE
+	CREATE, DELETE, UPDATE
 }

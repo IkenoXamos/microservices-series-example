@@ -21,6 +21,9 @@ import com.revature.messaging.Operation;
 import com.revature.models.Flashcard;
 import com.revature.repositories.FlashcardRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 public class FlashcardController {
 	
@@ -37,6 +40,8 @@ public class FlashcardController {
 	public String getPort() {
 		String port = env.getProperty("local.server.port");
 		
+		log.info("Request for port: {}", port);
+		
 		return "Hello, this came from port " + port;
 	}
 
@@ -45,14 +50,20 @@ public class FlashcardController {
 		if(ids == null) {
 			List<Flashcard> all = flashcardDao.findAll();
 			
+			log.info("Request for all flashcards: {}", all);
+			
 			return ResponseEntity.ok(all);
 		}
 		
-		List<Flashcard> some = flashcardDao.findByIdIn(Arrays.asList(ids));
+		List<Flashcard> some = this.flashcardDao.findByIdIn(ids);
 		
 		if(some.size() != ids.length) {
+			log.warn("Requested ids did not match the list of ids found. {} ids found vs {} ids requested", some.size(), ids.length);
+			
 			return ResponseEntity.badRequest().body(some);
 		}
+		
+		log.info("Request for flashcards with ids {}: {}", Arrays.toString(ids), some);
 		
 		return ResponseEntity.ok(some);
 	}
@@ -62,8 +73,12 @@ public class FlashcardController {
 		Optional<Flashcard> optional = flashcardDao.findById(id);
 		
 		if(optional.isPresent()) {
+			log.info("Request for flashcard with id {}: {}", id, optional.get());
+			
 			return ResponseEntity.ok(optional.get());
 		}
+		
+		log.info("Request for flashcard with id {}, but no match found for id");
 		
 		return ResponseEntity.noContent().build();
 	}
@@ -73,13 +88,15 @@ public class FlashcardController {
 		int id = flashcard.getId();
 		
 		if(id != 0) {
+			log.error("Request to create a new flashcard failed: {}", flashcard);
+			
 			return ResponseEntity.badRequest().build();
 		}
 		
 		flashcardDao.save(flashcard);
+		this.messageService.triggerFlashcardEvent(new FlashcardEvent(flashcard, Operation.CREATE));
 		
-		FlashcardEvent event = new FlashcardEvent(Operation.CREATE, flashcard);
-		this.messageService.triggerEvent(event);
+		log.info("Request to create a new flashcard successfully completed: {}", flashcard);
 		
 		return ResponseEntity.status(201).body(flashcard);
 	}
@@ -89,14 +106,14 @@ public class FlashcardController {
 		Optional<Flashcard> option = flashcardDao.findById(id);
 
 		if(option.isPresent()) {
-			Flashcard f = option.get();
-			flashcardDao.delete(f);
+			flashcardDao.delete(option.get());
+			this.messageService.triggerFlashcardEvent(new FlashcardEvent(option.get(), Operation.DELETE));
 			
-			FlashcardEvent event = new FlashcardEvent(Operation.DELETE, f);
-			this.messageService.triggerEvent(event);
-			
-			return ResponseEntity.accepted().body(f);
+			log.info("Request to delete flashcard with id {} successfully completed");
+			return ResponseEntity.accepted().body(option.get());
 		}
+		
+		log.info("Request to delete flashcard with id {}, but no match found for id");
 		
 		return ResponseEntity.notFound().build();
 	}

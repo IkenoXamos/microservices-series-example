@@ -8,5 +8,5 @@ import com.revature.models.Flashcard;
 
 public interface FlashcardRepository extends JpaRepository<Flashcard, Integer> {
 
-	public List<Flashcard> findByIdIn(List<Integer> ids);
+	public List<Flashcard> findByIdIn(Integer[] ids);
 }

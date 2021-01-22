@@ -16,7 +16,7 @@ public interface FlashcardClient {
 	
 	@GetMapping
 	public List<Flashcard> findByIds(@RequestParam List<Integer> ids);
-
+	
 	@GetMapping("/port")
-	public String retrievePort();
+	public String getPort();
 }

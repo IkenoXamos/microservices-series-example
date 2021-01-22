@@ -18,22 +18,32 @@ import com.revature.models.Flashcard;
 import com.revature.models.Quiz;
 import com.revature.models.QuizComposite;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 public class QuizCompositeController {
-
+	
 	@Autowired
 	private FlashcardClient flashcardClient;
 	
 	@Autowired
 	private QuizClient quizClient;
-	
+
 	@GetMapping("/{id}")
 	public ResponseEntity<QuizComposite> compile(@PathVariable("id") int id) {
+		
+		
+		
 		Quiz q = this.quizClient.findById(id);
 		
-		List<Flashcard> cards = this.flashcardClient.findByIds(q.getCards());
+		List<Integer> ids = q.getCards();
+		
+		List<Flashcard> cards = this.flashcardClient.findByIds(ids);
 		
 		QuizComposite composite = new QuizComposite(q, cards);
+		
+		log.info("Request for quiz-composite with id {}: {}", id, composite);
 		
 		return ResponseEntity.ok(composite);
 	}
@@ -42,22 +52,28 @@ public class QuizCompositeController {
 	public ResponseEntity<List<QuizComposite>> compileAll() {
 		List<Flashcard> allcards = this.flashcardClient.findAll();
 		
-		List<Quiz> allquiz = this.quizClient.findAll();
+		List<Quiz> allquizzes = this.quizClient.findAll();
 		
-		if(allquiz == null) {
-			allquiz = new ArrayList<>();
+		if(allquizzes == null) {
+			allquizzes = new ArrayList<>();
+		}
+		
+		if(allcards == null) {
+			allcards = new ArrayList<>();
 		}
 		
 		Map<Integer, Flashcard> cardMap = allcards.stream()
 				.collect(Collectors.toMap(Flashcard::getId, Function.identity()));
 		
-		List<QuizComposite> result = allquiz.stream().map((Quiz q) -> {
+		List<QuizComposite> result = allquizzes.stream().map( (Quiz q) -> {
 			List<Flashcard> cards = q.getCards().stream()
 					.map(cardMap::get)
 					.collect(Collectors.toList());
 			
 			return new QuizComposite(q, cards);
 		}).collect(Collectors.toList());
+		
+		log.info("Request for all quiz-composites: {}", result);
 		
 		return ResponseEntity.ok(result);
 	}

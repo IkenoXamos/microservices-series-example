@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: flashcard
+  cloud:
+    config:
+      fail-fast: true
+      retry:        max-attempts: 15
+      discovery:
+        enabled: true
+        serviceId: config
+---
+spring:
+  profiles: dev
+  cloud:
+    consul:
+      discovery:
+        instance-id: ${spring.application.name}:${server.port}:${random.value}
+      host: consul
+      port: 8500
+  zipkin:
+    base-url: http://zipkin:9411

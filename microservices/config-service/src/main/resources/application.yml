@@ -1,0 +1,23 @@
+server:
+  port: 8888
+spring:
+  application:
+    name: config
+  cloud:
+    config:
+      server:
+        git:
+          default-label: kubernetes
+          uri: https://github.com/201026java/config
+logging:  level: 
+    ROOT: INFO
+---
+spring:
+  profiles: dev
+  cloud:
+    consul:
+      discovery:
+        instance-id: ${spring.application.name}:${server.port}:${random.value}
+      host: consul
+      port: 8500
+  zipkin:    base-url: http://zipkin:9411

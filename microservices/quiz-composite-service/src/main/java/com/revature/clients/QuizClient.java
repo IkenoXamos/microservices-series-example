@@ -10,10 +10,10 @@ import com.revature.models.Quiz;
 
 @FeignClient(name = "quiz")
 public interface QuizClient {
-
+	
 	@GetMapping
 	public List<Quiz> findAll();
-	
+
 	@GetMapping("/{id}")
 	public Quiz findById(@PathVariable("id") int id);
 }

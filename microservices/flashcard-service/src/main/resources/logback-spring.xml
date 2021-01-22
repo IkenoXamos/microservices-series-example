@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<configuration scan="true">
+
+	<!-- Include access to Spring's default Logging Resources -->
+	<include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+	<!-- Fluentd java -->
+	<appender name="FLUENT"
+		class="ch.qos.logback.more.appenders.DataFluentAppender">
+
+		<!-- Tag for Fluentd. Farther information: http://docs.fluentd.org/articles/config-file -->
+		<tag>debug</tag>
+		<!-- [Optional] Label for Fluentd. Farther information: http://docs.fluentd.org/articles/config-file -->
+		<!-- <label>logback</label> -->
+
+		<!-- Host name/address and port number which Fluentd placed -->
+		<remoteHost>fluentd</remoteHost>
+		<port>24224</port>
+		<!-- [Optional] Additional fields(Pairs of key: value) -->
+		<additionalField> <key>service</key> <value>flashcard</value> </additionalField>
+		<!-- <additionalField> <key></key> <value>bar2</value> </additionalField> -->
+
+		<!-- [Optional] Configurations to customize Fluent-logger-java's behavior -->
+		<!-- <bufferCapacity>16777216</bufferCapacity> --> <!-- in bytes -->
+		<!-- <timeout>10000</timeout> --> <!-- in milliseconds -->
+
+		<!-- [Optional] If true, Map Marker is expanded instead of nesting in the 
+			marker name -->
+		<!-- <flattenMapMarker>false</flattenMapMarker> -->
+		<!-- [Optional] default "marker" -->
+		<!-- <markerPrefix></markerPrefix> -->
+
+		<!-- [Optional] Message encoder if you want to customize message -->
+		<!-- <encoder> <pattern><![CDATA[%date{HH:mm:ss.SSS} [%thread] %-5level 
+			%logger{15}#%line %message]]></pattern> </encoder> -->
+
+		<!-- [Optional] Message field key name. Default: "message" -->
+		<!-- <messageFieldKeyName>msg</messageFieldKeyName> -->
+	</appender>
+
+	<appender name="STDOUT"
+		class="ch.qos.logback.core.ConsoleAppender">
+		
+		<encoder>
+			<pattern>${CONSOLE_LOG_PATTERN}</pattern>
+		</encoder>
+	</appender>
+	
+	<appender name="FILE"
+		class="ch.qos.logback.core.FileAppender">
+		<file>application.log</file>
+		
+		<encoder>
+			<pattern>${CONSOLE_LOG_PATTERN}</pattern>
+		</encoder>
+	</appender>
+
+	<root>
+		<level value="INFO" />
+		<appender-ref ref="STDOUT" />
+	</root>
+	
+	<springProfile name="dev">
+		<logger name="com.revature" level="INFO">
+			<!-- <appender-ref ref="FILE" /> -->
+			<appender-ref ref="FLUENT" />
+		</logger>
+	</springProfile>
+</configuration>

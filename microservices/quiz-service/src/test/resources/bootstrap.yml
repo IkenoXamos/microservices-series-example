@@ -1,0 +1,9 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+    consul:
+      enabled: false
+  kafka:
+    consumer:
+      group-id: test

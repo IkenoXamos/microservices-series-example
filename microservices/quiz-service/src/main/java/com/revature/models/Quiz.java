@@ -8,15 +8,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 @Entity
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @EqualsAndHashCode @ToString
+@Data @NoArgsConstructor
 public class Quiz {
 
 	@Id

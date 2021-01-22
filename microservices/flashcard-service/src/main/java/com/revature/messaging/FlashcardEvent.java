@@ -4,23 +4,19 @@ import java.time.LocalDateTime;
 
 import com.revature.models.Flashcard;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @EqualsAndHashCode @ToString
+@Data @NoArgsConstructor
 public class FlashcardEvent {
 
-	private Operation operation;
 	private Flashcard flashcard;
+	private Operation operation;
 	private LocalDateTime timestamp;
 	
-	public FlashcardEvent(Operation operation, Flashcard flashcard) {
-		this.operation = operation;
+	public FlashcardEvent(Flashcard flashcard, Operation operation) {
 		this.flashcard = flashcard;
+		this.operation = operation;
 		this.timestamp = LocalDateTime.now();
 	}
 }

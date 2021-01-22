@@ -1,0 +1,5 @@
+#spring:
+#  application:
+#    name: quiz
+#server:
+#  port: 8090
